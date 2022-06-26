@@ -1,8 +1,8 @@
 export class BadDataException extends Error {
-  private payload: Record<any, any>;
+  private payload: string;
 
-  constructor(payload) {
-    super(`Data is incorrect. Please check: ${payload}`);
+  constructor(payload: string) {
+    super(`Input Data is incorrect. Please check: ${payload}`);
     this.payload = payload;
   }
 }

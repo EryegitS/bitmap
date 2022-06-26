@@ -20,22 +20,28 @@ export class InputFileReader {
     private readerInterface: Interface;
     public whitePixels: Pixel[] = [];
 
+    /**
+     * parsing input file line by line
+     * there are some logic according to line number
+     * validating line: there are different validation rules according to the line number
+     * @param filePath: path of input file
+     */
     public readInputFile(filePath) {
         this.readerInterface = createInterface(createReadStream(filePath));
         let counter = 0;
         this.readerInterface.on('line', (line: string) => {
             if (!counter) {
                 const caseCount = Number(line.trim());
-                this.validate(CaseCountValidation, caseCount);
+                this.validateNumberValues(CaseCountValidation, caseCount);
                 this.testCaseCount = caseCount;
             } else if (counter === 1) {
                 const sizeOfBitmap = line.trim().split(' ').map(Number);
-                this.validate(BitmapRowCountValidation, sizeOfBitmap[0]);
-                this.validate(BitmapColumnCountValidation, sizeOfBitmap[1]);
+                this.validateNumberValues(BitmapRowCountValidation, sizeOfBitmap[0]);
+                this.validateNumberValues(BitmapColumnCountValidation, sizeOfBitmap[1]);
                 this.sizeOfBitmap = sizeOfBitmap
             } else {
                 const rowIndex = counter - 2;
-                this.prepareBitmap(line.trim().split('').map(Number), rowIndex);
+                this.createBitmap(line.trim().split('').map(Number), rowIndex);
             }
             counter++;
         });
@@ -44,24 +50,49 @@ export class InputFileReader {
         });
     }
 
+    /**
+     * validating bitmap data
+     * @private
+     */
     private validateBitmapData() {
-        if (this.bitmap.length !== this.getHeightOfBitmap()) throw new BadDataException(this.bitmap);
-        this.bitmap.forEach(rows => {
-            if (rows.length !== this.getWidthOfBitmap()) throw new BadDataException(this.bitmap);
+        /** Checkin row count of input */
+        if (this.bitmap.length !== this.getHeightOfBitmap())
+            throw new BadDataException('row count of input');
+
+        /** Checkin column count of input */
+        this.bitmap.forEach((rows, index) => {
+            if (rows.length !== this.getWidthOfBitmap())
+                throw new BadDataException(`column count at line ${this.getLineNumberByIndex(index)}`);
         })
+
+        /** Checkin white pixel count of input */
+        if (!this.whitePixels.length)
+            throw new WhitePixelNotFoundException();
     }
 
-    private validate(validation: Joi.NumberSchema, value: number): void {
+    /**
+     * using for validation of number values with related joi schema
+     * @param validation: Joi number validation ruleset
+     * @param value which should be validated
+     * @private
+     */
+    private validateNumberValues(validation: Joi.NumberSchema, value: number): void {
         const {error} = validation.validate(value);
         if (error) throw new Error(error.message);
     }
 
-    private prepareBitmap(values: number[], rowIndex) {
-        // TODO validation
+    /**
+     * creating bitmap by input file values and row and column index
+     * @param values: color values of pixel
+     * @param rowIndex: index of row in bitmap array
+     * @private
+     */
+    private createBitmap(values: number[], rowIndex) {
         this.bitmap[rowIndex] = [];
-        if (values.length !== this.getWidthOfBitmap()) throw new BadDataException(values);
+        if (values.length !== this.getWidthOfBitmap())
+            throw new BadDataException(`column count at line ${this.getLineNumberByIndex(rowIndex)}`);
         values.forEach((value, columnIndex) => {
-            this.validate(PixelValueValidation, value)
+            this.validateNumberValues(PixelValueValidation, value)
             const pixel = {
                 column: columnIndex,
                 row: rowIndex,
@@ -70,28 +101,52 @@ export class InputFileReader {
             if (pixel.color === PixelValues.White) this.addWhitePixelsToList(pixel);
             this.bitmap[rowIndex].push(pixel);
         });
-
-        if (!this.whitePixels.length) throw new WhitePixelNotFoundException();
     }
 
+    /**
+     * adding white pixel a list that will be used when it's needed
+     * @param pixel
+     * @private
+     */
     private addWhitePixelsToList(pixel: Pixel) {
         this.whitePixels.push(pixel);
     }
 
+    /**
+     *  get created bitmap by input file
+     */
     public getBitmap(): Bitmap<Pixel> {
         return this.bitmap;
     }
 
-    public getHeightOfBitmap() {
+    /**
+     * get height of bitmap
+     */
+    public getHeightOfBitmap(): number {
         return this.sizeOfBitmap[0];
     }
 
-    public getWidthOfBitmap() {
+    /**
+     * get width of bitmap
+     */
+    public getWidthOfBitmap(): number {
         return this.sizeOfBitmap[1];
     }
 
-    get interface() {
+    /**
+     * Get reader interface
+     */
+    get interface(): Interface {
         return this.readerInterface;
+    }
+
+    /**
+     * get line number of row index
+     * @param index
+     * @private
+     */
+    private getLineNumberByIndex(index: number): number {
+        return index + 3
     }
 
 }
