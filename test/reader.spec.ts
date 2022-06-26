@@ -2,13 +2,20 @@ import { InputFileReader } from '../src/input-file-reader';
 import * as path from 'path';
 import { Pixel } from '../src/models/pixel';
 import { PixelValues } from '../src/models/pixel-values';
+import { BadDataException } from '../src/exceptions/bad-data-exception';
+import { WhitePixelNotFoundException } from '../src/exceptions/white-pixel-not-found-exception';
+import {
+    BitmapColumnCountValidation,
+    BitmapRowCountValidation,
+    CaseCountValidation,
+    PixelValueValidation,
+    isNumberValid
+} from '../src/models/validations';
+import { ValidationException } from '../src/exceptions/validation-exception';
 
 describe('Tests of Input File Reader', () => {
-    // beforeAll(() => {
-    //
-    // });
     it('should read input file successfully', () => {
-        // given
+        /** given */
         const filePath = path.resolve(__dirname, 'files/success3x4.txt');
         const reader = new InputFileReader();
         const input = [
@@ -17,7 +24,7 @@ describe('Tests of Input File Reader', () => {
             [0, 1, 1, 0]
         ];
 
-        // when
+        /** when */
         reader.readInputFile(filePath);
         const whitePixelList: Pixel[] = [];
         input.forEach((rows, rowIndex) => {
@@ -34,17 +41,22 @@ describe('Tests of Input File Reader', () => {
             });
         });
 
-        // then
+        /** then */
+
         reader.interface.on('close', () => {
             const bitmap = reader.getBitmap();
-            const pixelValues = bitmap.map(rows => {
-                return rows.map(pixel => pixel.color);
-            });
-
             expect(reader.testCaseCount).toBe(1);
             expect(reader.getHeightOfBitmap).toBe(3);
             expect(reader.getWidthOfBitmap).toBe(4);
-            expect(pixelValues).toEqual(input);
+
+            bitmap.forEach((rows, rowIndex) => {
+                rows.map((pixel, columnIndex) => {
+                    expect(pixel.color).toEqual(input[rowIndex][columnIndex]);
+                    expect(pixel.row).toEqual(rowIndex);
+                    expect(pixel.column).toEqual(columnIndex);
+                });
+            });
+
             expect(reader.whitePixels.length).toEqual(whitePixelList.length);
             reader.whitePixels.map((pixel, index) => {
                 expect(pixel.costToWhitePixel).toEqual(whitePixelList[index].costToWhitePixel);
@@ -52,7 +64,87 @@ describe('Tests of Input File Reader', () => {
                 expect(pixel.row).toEqual(whitePixelList[index].row);
                 expect(pixel.column).toEqual(whitePixelList[index].column);
             });
-
         });
+    });
+
+    it('should throw bad data exception if column information is wrong in input file', () => {
+        // given
+        const filePath = path.resolve(__dirname, 'files/fail-bad-input-data-column.txt');
+        const reader = new InputFileReader();
+
+        // when
+        reader.readInputFile(filePath);
+
+        // then
+        reader.interface.on('close', () => {
+            expect(reader.getBitmap()).toThrow(BadDataException);
+            expect(reader.getBitmap()).toThrow('Input data is incorrect. Please check: column count at line 5');
+        });
+    });
+
+    it('should throw bad data exception if row information is wrong in input file', () => {
+        /** given */
+        const filePath = path.resolve(__dirname, 'files/fail-bad-input-data-row.txt');
+        const reader = new InputFileReader();
+
+        /** when */
+        reader.readInputFile(filePath);
+
+        /** then */
+        reader.interface.on('close', () => {
+            expect(reader.getBitmap()).toThrow(BadDataException);
+            expect(reader.getBitmap()).toThrow('Input data is incorrect. Please check: row count of input');
+        });
+    });
+
+    it('should throw no white pixel exception if there is no white pixel value in input data', () => {
+        /** given */
+        const filePath = path.resolve(__dirname, 'files/fail-no-white-pixel.txt');
+        const reader = new InputFileReader();
+
+        /** when */
+        reader.readInputFile(filePath);
+
+        /** then */
+        reader.interface.on('close', () => {
+            expect(reader.getBitmap()).toThrow(WhitePixelNotFoundException);
+            expect(reader.getBitmap()).toThrow('No white pixel found in bitmap');
+        });
+    });
+
+    it('should throw validation exception if input data is not valid', () => {
+        /** given */
+        const outOfRangeCaseCount = 1001;
+        const outOfRangeRowIndex = 183;
+        const outOfRangeColumnIndex = 183;
+        const outOfRangePixelValue = 2;
+
+        /** when */
+
+        /** then */
+        // out of range case count
+        try {
+            isNumberValid(CaseCountValidation, outOfRangeCaseCount)
+        } catch (e) {
+            expect(e).toBeInstanceOf(ValidationException);
+        }
+        // out of range row count
+        try {
+            isNumberValid(BitmapRowCountValidation, outOfRangeRowIndex)
+        } catch (e) {
+            expect(e).toBeInstanceOf(ValidationException);
+        }
+        // out of range column count
+        try {
+            isNumberValid(BitmapColumnCountValidation, outOfRangeColumnIndex)
+        } catch (e) {
+            expect(e).toBeInstanceOf(ValidationException);
+        }
+        // out of range pixel value
+        try {
+            isNumberValid(PixelValueValidation, outOfRangePixelValue)
+        } catch (e) {
+            expect(e).toBeInstanceOf(ValidationException);
+        }
     });
 });

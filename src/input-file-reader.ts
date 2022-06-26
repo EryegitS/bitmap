@@ -9,9 +9,9 @@ import {
     BitmapColumnCountValidation,
     BitmapRowCountValidation,
     CaseCountValidation,
-    PixelValueValidation
+    PixelValueValidation,
+    isNumberValid
 } from './models/validations';
-import * as Joi from 'joi';
 
 export class InputFileReader {
     private _testCaseCount: number;
@@ -32,21 +32,18 @@ export class InputFileReader {
         this._readerInterface.on('line', (line: string) => {
             if (!counter) {
                 const caseCount = Number(line.trim());
-                this.validateNumberValues(CaseCountValidation, caseCount);
+                isNumberValid(CaseCountValidation, caseCount);
                 this._testCaseCount = caseCount;
             } else if (counter === 1) {
                 const sizeOfBitmap = line.trim().split(' ').map(Number);
-                this.validateNumberValues(BitmapRowCountValidation, sizeOfBitmap[0]);
-                this.validateNumberValues(BitmapColumnCountValidation, sizeOfBitmap[1]);
+                isNumberValid(BitmapRowCountValidation, sizeOfBitmap[0]);
+                isNumberValid(BitmapColumnCountValidation, sizeOfBitmap[1]);
                 this._sizeOfBitmap = sizeOfBitmap;
             } else {
                 const rowIndex = counter - 2;
                 this.createBitmap(line.trim().split('').map(Number), rowIndex);
             }
             counter++;
-        });
-        this._readerInterface.on('close', () => {
-            this.validateBitmapData();
         });
     }
 
@@ -71,18 +68,6 @@ export class InputFileReader {
     }
 
     /**
-     * using for validation of number values with related joi schema
-     * @param validation: Joi number validation ruleset
-     * @param value which should be validated
-     * @private
-     */
-    private validateNumberValues(validation: Joi.NumberSchema, value: number): void {
-        const {error} = validation.validate(value);
-        if (error)
-            throw new Error(error.message);
-    }
-
-    /**
      * creating bitmap by input file values and row and column index
      * @param values: color values of pixel
      * @param rowIndex: index of row in bitmap array
@@ -93,7 +78,7 @@ export class InputFileReader {
         if (values.length !== this.getWidthOfBitmap)
             throw new BadDataException(`column count at line ${this.getLineNumberByIndex(rowIndex)}`);
         values.forEach((value, columnIndex) => {
-            this.validateNumberValues(PixelValueValidation, value);
+            isNumberValid(PixelValueValidation, value);
             const pixel = {
                 column: columnIndex,
                 row: rowIndex,
@@ -120,6 +105,7 @@ export class InputFileReader {
      *  get created bitmap by input file
      */
     public getBitmap(): Bitmap<Pixel> {
+        this.validateBitmapData();
         return this._bitmap;
     }
 
