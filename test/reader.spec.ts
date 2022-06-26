@@ -45,11 +45,13 @@ describe('Tests of Input File Reader', () => {
 
         reader.interface.on('close', () => {
             const bitmap = reader.getBitmap();
+            const index = 3;
 
             // input parameters
             expect(reader.testCaseCount).toBe(1);
             expect(reader.getHeightOfBitmap).toBe(3);
             expect(reader.getWidthOfBitmap).toBe(4);
+            expect(InputFileReader.getLineNumberByIndex(index)).toBe(index + 3);
 
             // pixel of bitmap properties
             bitmap.forEach((rows, rowIndex) => {
@@ -128,28 +130,28 @@ describe('Tests of Input File Reader', () => {
         /** then */
         // out of range case count
         try {
-            isNumberValid(CaseCountValidation, outOfRangeCaseCount)
+            isNumberValid(CaseCountValidation, outOfRangeCaseCount);
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }
 
         // out of range row count
         try {
-            isNumberValid(BitmapRowCountValidation, outOfRangeRowIndex)
+            isNumberValid(BitmapRowCountValidation, outOfRangeRowIndex);
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }
 
         // out of range column count
         try {
-            isNumberValid(BitmapColumnCountValidation, outOfRangeColumnIndex)
+            isNumberValid(BitmapColumnCountValidation, outOfRangeColumnIndex);
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }
 
         // out of range pixel value
         try {
-            isNumberValid(PixelValueValidation, outOfRangePixelValue)
+            isNumberValid(PixelValueValidation, outOfRangePixelValue);
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }

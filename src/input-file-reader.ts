@@ -59,7 +59,7 @@ export class InputFileReader {
         /** Checkin column count of input */
         this._bitmap.forEach((rows, index) => {
             if (rows.length !== this.getWidthOfBitmap)
-                throw new BadDataException(`column count at line ${this.getLineNumberByIndex(index)}`);
+                throw new BadDataException(`column count at line ${InputFileReader.getLineNumberByIndex(index)}`);
         });
 
         /** Checkin white pixel count of input */
@@ -76,7 +76,7 @@ export class InputFileReader {
     private createBitmap(values: number[], rowIndex) {
         this._bitmap[rowIndex] = [];
         if (values.length !== this.getWidthOfBitmap)
-            throw new BadDataException(`column count at line ${this.getLineNumberByIndex(rowIndex)}`);
+            throw new BadDataException(`column count at line ${InputFileReader.getLineNumberByIndex(rowIndex)}`);
         values.forEach((value, columnIndex) => {
             isNumberValid(PixelValueValidation, value);
             const pixel = {
@@ -114,7 +114,7 @@ export class InputFileReader {
      * @param index
      * @private
      */
-    private getLineNumberByIndex(index: number): number {
+    static getLineNumberByIndex(index: number): number {
         return index + 3;
     }
 
