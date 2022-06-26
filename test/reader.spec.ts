@@ -45,37 +45,41 @@ describe('Tests of Input File Reader', () => {
 
         reader.interface.on('close', () => {
             const bitmap = reader.getBitmap();
+
+            // input parameters
             expect(reader.testCaseCount).toBe(1);
             expect(reader.getHeightOfBitmap).toBe(3);
             expect(reader.getWidthOfBitmap).toBe(4);
 
+            // pixel of bitmap properties
             bitmap.forEach((rows, rowIndex) => {
                 rows.map((pixel, columnIndex) => {
-                    expect(pixel.color).toEqual(input[rowIndex][columnIndex]);
-                    expect(pixel.row).toEqual(rowIndex);
-                    expect(pixel.column).toEqual(columnIndex);
+                    expect(pixel.color).toBe(input[rowIndex][columnIndex]);
+                    expect(pixel.row).toBe(rowIndex);
+                    expect(pixel.column).toBe(columnIndex);
                 });
             });
 
-            expect(reader.whitePixels.length).toEqual(whitePixelList.length);
+            //white pixel
+            expect(reader.whitePixels.length).toBe(whitePixelList.length);
             reader.whitePixels.map((pixel, index) => {
-                expect(pixel.costToWhitePixel).toEqual(whitePixelList[index].costToWhitePixel);
-                expect(pixel.color).toEqual(whitePixelList[index].color);
-                expect(pixel.row).toEqual(whitePixelList[index].row);
-                expect(pixel.column).toEqual(whitePixelList[index].column);
+                expect(pixel.costToWhitePixel).toBe(whitePixelList[index].costToWhitePixel);
+                expect(pixel.color).toBe(whitePixelList[index].color);
+                expect(pixel.row).toBe(whitePixelList[index].row);
+                expect(pixel.column).toBe(whitePixelList[index].column);
             });
         });
     });
 
     it('should throw bad data exception if column information is wrong in input file', () => {
-        // given
+        /** given */
         const filePath = path.resolve(__dirname, 'files/fail-bad-input-data-column.txt');
         const reader = new InputFileReader();
 
-        // when
+        /** when */
         reader.readInputFile(filePath);
 
-        // then
+        /** then */
         reader.interface.on('close', () => {
             expect(reader.getBitmap()).toThrow(BadDataException);
             expect(reader.getBitmap()).toThrow('Input data is incorrect. Please check: column count at line 5');
@@ -128,18 +132,21 @@ describe('Tests of Input File Reader', () => {
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }
+
         // out of range row count
         try {
             isNumberValid(BitmapRowCountValidation, outOfRangeRowIndex)
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }
+
         // out of range column count
         try {
             isNumberValid(BitmapColumnCountValidation, outOfRangeColumnIndex)
         } catch (e) {
             expect(e).toBeInstanceOf(ValidationException);
         }
+
         // out of range pixel value
         try {
             isNumberValid(PixelValueValidation, outOfRangePixelValue)
