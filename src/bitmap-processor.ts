@@ -21,7 +21,7 @@ export class BitmapProcessor {
      */
     public async readInputFile(filePath: string): Promise<void> {
         this._reader = new InputFileReader();
-        this._input = await this._reader.readInputFile(filePath);
+        this._input = await this.reader.readInputFile(filePath);
         this._output = this.computeCosts();
     }
 
@@ -83,7 +83,7 @@ export class BitmapProcessor {
 
             /** Checkin new pixel value in bitmap */
             if (this.isNewPixelInMap(newRowIndex, newColumnIndex)) {
-                const neighbour = this._input[newRowIndex][newColumnIndex];
+                const neighbour = this.input[newRowIndex][newColumnIndex];
                 /** Checkin new pixel is already hit */
                 if (!neighbour.isHit) {
                     neighbours.push(neighbour);
@@ -111,7 +111,7 @@ export class BitmapProcessor {
     public printOutput() {
         this.printInput();
         console.log('output table:');
-        console.table(this._output);
+        console.table(this.output);
     }
 
 
@@ -119,14 +119,14 @@ export class BitmapProcessor {
      * gets highest index of row items array
      */
     get rowMaxIndex(): number {
-        return this._reader.getHeightOfBitmap - 1;
+        return this.reader.getHeightOfBitmap - 1;
     }
 
     /**
      * gets highest index of column items array
      */
     get columnMaxIndex(): number {
-        return this._reader.getWidthOfBitmap - 1;
+        return this.reader.getWidthOfBitmap - 1;
     }
 
     /**
