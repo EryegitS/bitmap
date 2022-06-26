@@ -6,7 +6,6 @@ const BitmapColumnCountValidation = Joi.number().min(1).max(182);
 const CaseCountValidation = Joi.number().min(1).max(1000);
 const PixelValueValidation = Joi.number().valid(0, 1);
 
-
 /**
  * using for validation of number values with related joi schema
  * @param validation: Joi number validation ruleset

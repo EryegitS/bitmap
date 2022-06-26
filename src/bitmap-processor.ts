@@ -19,7 +19,7 @@ export class BitmapProcessor {
      * after all pixels processed, prints the output
      * @param filePath: path of input file
      */
-    public async readInputFile(filePath: string): Promise<void>  {
+    public async readInputFile(filePath: string): Promise<void> {
         this._reader = new InputFileReader();
         this._input = await this._reader.readInputFile(filePath);
         this._output = this.computeCosts();
