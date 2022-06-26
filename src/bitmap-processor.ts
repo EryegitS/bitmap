@@ -2,11 +2,12 @@ import { InputFileReader } from './input-file-reader';
 import { Bitmap } from './models/types';
 import { Pixel } from './models/pixel';
 import { Direction } from './models/types';
+import { Interface } from 'readline';
 
 export class BitmapProcessor {
-    private reader: InputFileReader;
-    private input: Bitmap<Pixel>;
-    private output: Bitmap<number>;
+    private _reader: InputFileReader;
+    private _input: Bitmap<Pixel>;
+    private _output: Bitmap<number>;
     private readonly directions: Direction = {
         east: [0, 1],
         west: [0, -1],
@@ -15,30 +16,30 @@ export class BitmapProcessor {
     };
 
     /**
-     * starts to estimating costs after bitmap is created by reading input file
+     * starts to compute costs after bitmap is created by reading input file
      * after all pixels processed, prints the output
      * @param filePath: path of input file
      */
     public readInputFile(filePath: string) {
-        this.reader = new InputFileReader();
-        this.reader.readInputFile(filePath);
-        this.reader.interface.on('close', () => {
-            this.input = this.reader.getBitmap();
+        this._reader = new InputFileReader();
+        this._reader.readInputFile(filePath);
+        this._reader.interface.on('close', () => {
+            this._input = this._reader.getBitmap();
             this.printInput();
-            this.output = this.estimateCosts();
+            this._output = this.computeCosts();
             this.printOutput();
         });
     }
 
     /**
-     *  White pixels will be origin while estimating neighbour pixels. So first elements of queue are white pixels.
+     *  White pixels will be origin while determining neighbour pixels. So first elements of queue are white pixels.
      *  Firstly finding neighbour pixels and checking their position in bitmap.
      *  Then checking they are already hit. If not, then adding to queue
      *  Afterwards set the cost to reach white by help of previous pixel
      * @private
      */
-    private estimateCosts(): Bitmap<number> {
-        const queue: Pixel[] = this.reader.whitePixels.map(white => {
+    private computeCosts(): Bitmap<number> {
+        const queue: Pixel[] = this._reader.whitePixels.map(white => {
             white.isHit = true;
             return white;
         });
@@ -55,7 +56,7 @@ export class BitmapProcessor {
             });
         }
 
-        return this.input.map(rows => {
+        return this._input.map(rows => {
             return rows.map(pixel => {
                 return pixel.costToWhitePixel;
             });
@@ -88,7 +89,7 @@ export class BitmapProcessor {
 
             /** Checkin new pixel value in bitmap */
             if (this.isNewPixelInMap(newRowIndex, newColumnIndex)) {
-                const neighbour = this.input[newRowIndex][newColumnIndex];
+                const neighbour = this._input[newRowIndex][newColumnIndex];
                 /** Checkin new pixel is already hit */
                 if (!neighbour.isHit) {
                     neighbours.push(neighbour);
@@ -99,36 +100,58 @@ export class BitmapProcessor {
     }
 
     /**
+     * print input of computation as table
+     * @private
+     */
+    private printInput() {
+        console.log('Input table:');
+        console.table(this._input.map(rows => {
+            return rows.map(p => p.color);
+        }));
+    }
+
+    /**
+     * print output of computation as table
+     * @private
+     */
+    private printOutput() {
+        console.log('output table:');
+        console.table(this._output);
+    }
+
+
+    /**
      * gets highest index of row items array
      */
     get rowMaxIndex(): number {
-        return this.reader.getHeightOfBitmap - 1;
+        return this._reader.getHeightOfBitmap - 1;
     }
 
     /**
      * gets highest index of column items array
      */
     get columnMaxIndex(): number {
-        return this.reader.getWidthOfBitmap - 1;
+        return this._reader.getWidthOfBitmap - 1;
     }
 
     /**
-     * print input of estimation as table
-     * @private
+     * gets input of output and output of reader
      */
-    private printInput() {
-        console.log('Input table:');
-        console.table(this.input.map(rows => {
-            return rows.map(p => p.color);
-        }));
+    get input(): Bitmap<Pixel> {
+        return this._input;
     }
 
     /**
-     * print output of estimation as table
-     * @private
+     * gets output of computation
      */
-    private printOutput() {
-        console.log('output table:');
-        console.table(this.output);
+    get output(): Bitmap<number> {
+        return this._output;
+    }
+
+    /**
+     * gets reader instance
+     */
+    get reader(): InputFileReader {
+        return this._reader;
     }
 }
