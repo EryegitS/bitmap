@@ -45,7 +45,7 @@ export class InputFileReader {
             }
             counter++;
         });
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this._readerInterface.on('close', () => {
                 resolve(this._bitmap);
             });
