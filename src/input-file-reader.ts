@@ -4,7 +4,7 @@ import {Bitmap} from './models/types';
 import {BadDataException} from './exceptions/bad-data-exception';
 import {Pixel} from './models/pixel';
 import {PixelValues} from './models/pixel-values';
-import {WhitePixelNotFoundException} from "./exceptions/white-pixel-not-found-exception";
+import {WhitePixelNotFoundException} from './exceptions/white-pixel-not-found-exception';
 import {
     BitmapColumnCountValidation,
     BitmapRowCountValidation,
@@ -78,7 +78,8 @@ export class InputFileReader {
      */
     private validateNumberValues(validation: Joi.NumberSchema, value: number): void {
         const {error} = validation.validate(value);
-        if (error) throw new Error(error.message);
+        if (error)
+            throw new Error(error.message);
     }
 
     /**
