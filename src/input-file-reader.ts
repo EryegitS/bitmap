@@ -14,11 +14,11 @@ import {
 import * as Joi from 'joi';
 
 export class InputFileReader {
-    private testCaseCount: number;
-    private sizeOfBitmap: number[];
-    private bitmap: Bitmap<Pixel> = [];
-    private readerInterface: Interface;
-    public whitePixels: Pixel[] = [];
+    private _testCaseCount: number;
+    private _sizeOfBitmap: number[];
+    private _bitmap: Bitmap<Pixel> = [];
+    private _readerInterface: Interface;
+    private _whitePixels: Pixel[] = [];
 
     /**
      * parsing input file line by line
@@ -27,25 +27,25 @@ export class InputFileReader {
      * @param filePath: path of input file
      */
     public readInputFile(filePath) {
-        this.readerInterface = createInterface(createReadStream(filePath));
+        this._readerInterface = createInterface(createReadStream(filePath));
         let counter = 0;
-        this.readerInterface.on('line', (line: string) => {
+        this._readerInterface.on('line', (line: string) => {
             if (!counter) {
                 const caseCount = Number(line.trim());
                 this.validateNumberValues(CaseCountValidation, caseCount);
-                this.testCaseCount = caseCount;
+                this._testCaseCount = caseCount;
             } else if (counter === 1) {
                 const sizeOfBitmap = line.trim().split(' ').map(Number);
                 this.validateNumberValues(BitmapRowCountValidation, sizeOfBitmap[0]);
                 this.validateNumberValues(BitmapColumnCountValidation, sizeOfBitmap[1]);
-                this.sizeOfBitmap = sizeOfBitmap;
+                this._sizeOfBitmap = sizeOfBitmap;
             } else {
                 const rowIndex = counter - 2;
                 this.createBitmap(line.trim().split('').map(Number), rowIndex);
             }
             counter++;
         });
-        this.readerInterface.on('close', () => {
+        this._readerInterface.on('close', () => {
             this.validateBitmapData();
         });
     }
@@ -56,17 +56,17 @@ export class InputFileReader {
      */
     private validateBitmapData() {
         /** Checkin row count of input */
-        if (this.bitmap.length !== this.getHeightOfBitmap())
+        if (this._bitmap.length !== this.getHeightOfBitmap)
             throw new BadDataException('row count of input');
 
         /** Checkin column count of input */
-        this.bitmap.forEach((rows, index) => {
-            if (rows.length !== this.getWidthOfBitmap())
+        this._bitmap.forEach((rows, index) => {
+            if (rows.length !== this.getWidthOfBitmap)
                 throw new BadDataException(`column count at line ${this.getLineNumberByIndex(index)}`);
         });
 
         /** Checkin white pixel count of input */
-        if (!this.whitePixels.length)
+        if (!this._whitePixels.length)
             throw new WhitePixelNotFoundException();
     }
 
@@ -89,8 +89,8 @@ export class InputFileReader {
      * @private
      */
     private createBitmap(values: number[], rowIndex) {
-        this.bitmap[rowIndex] = [];
-        if (values.length !== this.getWidthOfBitmap())
+        this._bitmap[rowIndex] = [];
+        if (values.length !== this.getWidthOfBitmap)
             throw new BadDataException(`column count at line ${this.getLineNumberByIndex(rowIndex)}`);
         values.forEach((value, columnIndex) => {
             this.validateNumberValues(PixelValueValidation, value);
@@ -99,8 +99,11 @@ export class InputFileReader {
                 row: rowIndex,
                 color: value
             } as Pixel;
-            if (pixel.color === PixelValues.White) this.addWhitePixelsToList(pixel);
-            this.bitmap[rowIndex].push(pixel);
+            if (pixel.color === PixelValues.White) {
+                pixel.costToWhitePixel = 0;
+                this.addWhitePixelsToList(pixel);
+            }
+            this._bitmap[rowIndex].push(pixel);
         });
     }
 
@@ -110,35 +113,14 @@ export class InputFileReader {
      * @private
      */
     private addWhitePixelsToList(pixel: Pixel) {
-        this.whitePixels.push(pixel);
+        this._whitePixels.push(pixel);
     }
 
     /**
      *  get created bitmap by input file
      */
     public getBitmap(): Bitmap<Pixel> {
-        return this.bitmap;
-    }
-
-    /**
-     * get height of bitmap
-     */
-    public getHeightOfBitmap(): number {
-        return this.sizeOfBitmap[0];
-    }
-
-    /**
-     * get width of bitmap
-     */
-    public getWidthOfBitmap(): number {
-        return this.sizeOfBitmap[1];
-    }
-
-    /**
-     * Get reader interface
-     */
-    get interface(): Interface {
-        return this.readerInterface;
+        return this._bitmap;
     }
 
     /**
@@ -148,6 +130,41 @@ export class InputFileReader {
      */
     private getLineNumberByIndex(index: number): number {
         return index + 3;
+    }
+
+    /**
+     * get width of bitmap
+     */
+    get getWidthOfBitmap(): number {
+        return this._sizeOfBitmap[1];
+    }
+
+    /**
+     * get height of bitmap
+     */
+    get getHeightOfBitmap(): number {
+        return this._sizeOfBitmap[0];
+    }
+
+    /**
+     * get reader interface
+     */
+    get interface(): Interface {
+        return this._readerInterface;
+    }
+
+    /**
+     * get test case count
+     */
+    get testCaseCount(): number {
+        return this._testCaseCount;
+    }
+
+    /**
+     * get white pixel information
+     */
+    get whitePixels(): Pixel[] {
+        return this._whitePixels;
     }
 
 }

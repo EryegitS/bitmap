@@ -39,7 +39,6 @@ export class BitmapProcessor {
      */
     private estimateCosts(): Bitmap<number> {
         const queue: Pixel[] = this.reader.whitePixels.map(white => {
-            white.costToWhitePixel = 0;
             white.isHit = true;
             return white;
         });
@@ -103,14 +102,14 @@ export class BitmapProcessor {
      * gets highest index of row items array
      */
     get rowMaxIndex(): number {
-        return this.reader.getHeightOfBitmap() - 1;
+        return this.reader.getHeightOfBitmap - 1;
     }
 
     /**
      * gets highest index of column items array
      */
     get columnMaxIndex(): number {
-        return this.reader.getWidthOfBitmap() - 1;
+        return this.reader.getWidthOfBitmap - 1;
     }
 
     /**
@@ -132,5 +131,4 @@ export class BitmapProcessor {
         console.log('output table:');
         console.table(this.output);
     }
-
 }

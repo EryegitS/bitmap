@@ -78,5 +78,5 @@ Before start program you have to point input file location by a flag in run comm
 After installation is completed you are ready to go.
 
 ```shell
-node dist/start.js --input ./test-cases/example1.txt
+node dist/src/start.js --input ./test-cases/example1.txt
 ```
