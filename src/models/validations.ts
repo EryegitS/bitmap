@@ -6,4 +6,4 @@ const CaseCountValidation = Joi.number().min(1).max(1000);
 const PixelValueValidation = Joi.number().valid(0, 1);
 
 
-export {BitmapRowCountValidation, BitmapColumnCountValidation, CaseCountValidation, PixelValueValidation}
+export { BitmapRowCountValidation, BitmapColumnCountValidation, CaseCountValidation, PixelValueValidation };

@@ -1,7 +1,7 @@
-import {InputFileReader} from './input-file-reader';
-import {Bitmap} from './models/types';
-import {Pixel} from './models/pixel';
-import {Direction} from './models/types';
+import { InputFileReader } from './input-file-reader';
+import { Bitmap } from './models/types';
+import { Pixel } from './models/pixel';
+import { Direction } from './models/types';
 
 export class BitmapProcessor {
     private reader: InputFileReader;
@@ -11,7 +11,7 @@ export class BitmapProcessor {
         east: [0, 1],
         west: [0, -1],
         south: [1, 0],
-        north: [-1, 0],
+        north: [-1, 0]
     };
 
     /**

@@ -1,10 +1,10 @@
-import {createReadStream} from 'fs';
-import {createInterface, Interface} from 'readline';
-import {Bitmap} from './models/types';
-import {BadDataException} from './exceptions/bad-data-exception';
-import {Pixel} from './models/pixel';
-import {PixelValues} from './models/pixel-values';
-import {WhitePixelNotFoundException} from './exceptions/white-pixel-not-found-exception';
+import { createReadStream } from 'fs';
+import { createInterface, Interface } from 'readline';
+import { Bitmap } from './models/types';
+import { BadDataException } from './exceptions/bad-data-exception';
+import { Pixel } from './models/pixel';
+import { PixelValues } from './models/pixel-values';
+import { WhitePixelNotFoundException } from './exceptions/white-pixel-not-found-exception';
 import {
     BitmapColumnCountValidation,
     BitmapRowCountValidation,
@@ -38,7 +38,7 @@ export class InputFileReader {
                 const sizeOfBitmap = line.trim().split(' ').map(Number);
                 this.validateNumberValues(BitmapRowCountValidation, sizeOfBitmap[0]);
                 this.validateNumberValues(BitmapColumnCountValidation, sizeOfBitmap[1]);
-                this.sizeOfBitmap = sizeOfBitmap
+                this.sizeOfBitmap = sizeOfBitmap;
             } else {
                 const rowIndex = counter - 2;
                 this.createBitmap(line.trim().split('').map(Number), rowIndex);
@@ -63,7 +63,7 @@ export class InputFileReader {
         this.bitmap.forEach((rows, index) => {
             if (rows.length !== this.getWidthOfBitmap())
                 throw new BadDataException(`column count at line ${this.getLineNumberByIndex(index)}`);
-        })
+        });
 
         /** Checkin white pixel count of input */
         if (!this.whitePixels.length)
@@ -93,11 +93,11 @@ export class InputFileReader {
         if (values.length !== this.getWidthOfBitmap())
             throw new BadDataException(`column count at line ${this.getLineNumberByIndex(rowIndex)}`);
         values.forEach((value, columnIndex) => {
-            this.validateNumberValues(PixelValueValidation, value)
+            this.validateNumberValues(PixelValueValidation, value);
             const pixel = {
                 column: columnIndex,
                 row: rowIndex,
-                color: value,
+                color: value
             } as Pixel;
             if (pixel.color === PixelValues.White) this.addWhitePixelsToList(pixel);
             this.bitmap[rowIndex].push(pixel);
@@ -147,7 +147,7 @@ export class InputFileReader {
      * @private
      */
     private getLineNumberByIndex(index: number): number {
-        return index + 3
+        return index + 3;
     }
 
 }

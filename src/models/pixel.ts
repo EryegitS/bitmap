@@ -1,4 +1,4 @@
-import {PixelValues} from './pixel-values';
+import { PixelValues } from './pixel-values';
 
 export class Pixel {
     public row: number;

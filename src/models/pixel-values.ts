@@ -1,4 +1,4 @@
 export enum PixelValues {
-  Black,
-  White
+    Black,
+    White
 }
