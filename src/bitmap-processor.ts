@@ -2,7 +2,6 @@ import { InputFileReader } from './input-file-reader';
 import { Bitmap } from './models/types';
 import { Pixel } from './models/pixel';
 import { Direction } from './models/types';
-import { Interface } from 'readline';
 
 export class BitmapProcessor {
     private _reader: InputFileReader;
@@ -20,15 +19,10 @@ export class BitmapProcessor {
      * after all pixels processed, prints the output
      * @param filePath: path of input file
      */
-    public readInputFile(filePath: string) {
+    public async readInputFile(filePath: string): Promise<void>  {
         this._reader = new InputFileReader();
-        this._reader.readInputFile(filePath);
-        this._reader.interface.on('close', () => {
-            this._input = this._reader.getBitmap();
-            this.printInput();
-            this._output = this.computeCosts();
-            this.printOutput();
-        });
+        this._input = await this._reader.readInputFile(filePath);
+        this._output = this.computeCosts();
     }
 
     /**
@@ -56,7 +50,7 @@ export class BitmapProcessor {
             });
         }
 
-        return this._input.map(rows => {
+        return this.input.map(rows => {
             return rows.map(pixel => {
                 return pixel.costToWhitePixel;
             });
@@ -105,7 +99,7 @@ export class BitmapProcessor {
      */
     private printInput() {
         console.log('Input table:');
-        console.table(this._input.map(rows => {
+        console.table(this.input.map(rows => {
             return rows.map(p => p.color);
         }));
     }
@@ -114,7 +108,8 @@ export class BitmapProcessor {
      * print output of computation as table
      * @private
      */
-    private printOutput() {
+    public printOutput() {
+        this.printInput();
         console.log('output table:');
         console.table(this._output);
     }

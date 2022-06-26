@@ -26,7 +26,7 @@ export class InputFileReader {
      * validating line: there are different validation rules according to the line number
      * @param filePath: path of input file
      */
-    public readInputFile(filePath) {
+    public readInputFile(filePath): Promise<Bitmap<Pixel>> {
         this._readerInterface = createInterface(createReadStream(filePath));
         let counter = 0;
         this._readerInterface.on('line', (line: string) => {
@@ -45,6 +45,12 @@ export class InputFileReader {
             }
             counter++;
         });
+        return new Promise((resolve, reject) => {
+            this._readerInterface.on('close', () => {
+                resolve(this._bitmap);
+            });
+        });
+
     }
 
     /**
@@ -75,8 +81,6 @@ export class InputFileReader {
      */
     private createBitmap(values: number[], rowIndex) {
         this._bitmap[rowIndex] = [];
-        if (values.length !== this.getWidthOfBitmap)
-            throw new BadDataException(`column count at line ${InputFileReader.getLineNumberByIndex(rowIndex)}`);
         values.forEach((value, columnIndex) => {
             isNumberValid(PixelValueValidation, value);
             const pixel = {

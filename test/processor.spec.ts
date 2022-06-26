@@ -14,21 +14,20 @@ describe('Tests of Bitmap Processor', () => {
         [1, 0, 0, 1]
     ] as Bitmap<number>;
 
-    it('should compute input bitmap successfully', () => {
+    it('should compute input bitmap successfully', async () => {
         /** given */
         const processor = new BitmapProcessor();
         const filePath = path.resolve(__dirname, 'files/success3x4.txt');
-        processor.readInputFile(filePath);
+        await processor.readInputFile(filePath);
 
-        processor.reader.interface.on('close', () => {
-            /** when */
-            const processorInput = processor.input.map((rows) => {
-                return rows.map((pixel) => pixel.color);
-            });
 
-            /** then */
-            expect(processorInput).toEqual(input);
-            expect(processor.output).toEqual(output);
+        /** when */
+        const processorInput = processor.input.map((rows) => {
+            return rows.map((pixel) => pixel.color);
         });
+
+        /** then */
+        expect(processorInput).toEqual(input);
+        expect(processor.output).toEqual(output);
     });
 });

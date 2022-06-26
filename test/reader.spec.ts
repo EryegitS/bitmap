@@ -14,7 +14,7 @@ import {
 import { ValidationException } from '../src/exceptions/validation-exception';
 
 describe('Tests of Input File Reader', () => {
-    it('should read input file successfully', () => {
+    it('should read input file successfully', async () => {
         /** given */
         const filePath = path.resolve(__dirname, 'files/success3x4.txt');
         const reader = new InputFileReader();
@@ -25,7 +25,7 @@ describe('Tests of Input File Reader', () => {
         ];
 
         /** when */
-        reader.readInputFile(filePath);
+        await reader.readInputFile(filePath);
         const whitePixelList: Pixel[] = [];
         input.forEach((rows, rowIndex) => {
             rows.forEach((color, columnIndex) => {
@@ -42,80 +42,85 @@ describe('Tests of Input File Reader', () => {
         });
 
         /** then */
+        const bitmap = reader.getBitmap();
+        const index = 3;
 
-        reader.interface.on('close', () => {
-            const bitmap = reader.getBitmap();
-            const index = 3;
+        // input parameters
+        expect(reader.testCaseCount).toBe(1);
+        expect(reader.getHeightOfBitmap).toBe(3);
+        expect(reader.getWidthOfBitmap).toBe(4);
+        expect(InputFileReader.getLineNumberByIndex(index)).toBe(index + 3);
 
-            // input parameters
-            expect(reader.testCaseCount).toBe(1);
-            expect(reader.getHeightOfBitmap).toBe(3);
-            expect(reader.getWidthOfBitmap).toBe(4);
-            expect(InputFileReader.getLineNumberByIndex(index)).toBe(index + 3);
-
-            // pixel of bitmap properties
-            bitmap.forEach((rows, rowIndex) => {
-                rows.map((pixel, columnIndex) => {
-                    expect(pixel.color).toBe(input[rowIndex][columnIndex]);
-                    expect(pixel.row).toBe(rowIndex);
-                    expect(pixel.column).toBe(columnIndex);
-                });
+        // pixel of bitmap properties
+        bitmap.forEach((rows, rowIndex) => {
+            rows.map((pixel, columnIndex) => {
+                expect(pixel.color).toBe(input[rowIndex][columnIndex]);
+                expect(pixel.row).toBe(rowIndex);
+                expect(pixel.column).toBe(columnIndex);
             });
+        });
 
-            //white pixel
-            expect(reader.whitePixels.length).toBe(whitePixelList.length);
-            reader.whitePixels.map((pixel, index) => {
-                expect(pixel.costToWhitePixel).toBe(whitePixelList[index].costToWhitePixel);
-                expect(pixel.color).toBe(whitePixelList[index].color);
-                expect(pixel.row).toBe(whitePixelList[index].row);
-                expect(pixel.column).toBe(whitePixelList[index].column);
-            });
+        //white pixel
+        expect(reader.whitePixels.length).toBe(whitePixelList.length);
+        reader.whitePixels.map((pixel, index) => {
+            expect(pixel.costToWhitePixel).toBe(whitePixelList[index].costToWhitePixel);
+            expect(pixel.color).toBe(whitePixelList[index].color);
+            expect(pixel.row).toBe(whitePixelList[index].row);
+            expect(pixel.column).toBe(whitePixelList[index].column);
         });
     });
 
-    it('should throw bad data exception if column information is wrong in input file', () => {
+    it('should throw bad data exception if column information is wrong in input file', async () => {
         /** given */
         const filePath = path.resolve(__dirname, 'files/fail-bad-input-data-column.txt');
         const reader = new InputFileReader();
 
         /** when */
-        reader.readInputFile(filePath);
-
-        /** then */
-        reader.interface.on('close', () => {
-            expect(reader.getBitmap()).toThrow(BadDataException);
-            expect(reader.getBitmap()).toThrow('Input data is incorrect. Please check: column count at line 5');
-        });
+        await reader.readInputFile(filePath);
+        try {
+            reader.getBitmap();
+        } catch (e) {
+            /** then */
+            expect(e).toBeInstanceOf(BadDataException);
+            expect(e.message).toBe('Input data is incorrect. Please check: column count at line 5');
+        }
     });
 
-    it('should throw bad data exception if row information is wrong in input file', () => {
+    it('should throw bad data exception if row information is wrong in input file', async () => {
         /** given */
         const filePath = path.resolve(__dirname, 'files/fail-bad-input-data-row.txt');
         const reader = new InputFileReader();
 
         /** when */
-        reader.readInputFile(filePath);
+        await reader.readInputFile(filePath);
 
         /** then */
-        reader.interface.on('close', () => {
-            expect(reader.getBitmap()).toThrow(BadDataException);
-            expect(reader.getBitmap()).toThrow('Input data is incorrect. Please check: row count of input');
-        });
+
+        try {
+            reader.getBitmap();
+        } catch (e) {
+            /** then */
+            expect(e).toBeInstanceOf(BadDataException);
+            expect(e.message).toBe('Input data is incorrect. Please check: row count of input');
+        }
     });
 
-    it('should throw no white pixel exception if there is no white pixel value in input data', () => {
+    it('should throw no white pixel exception if there is no white pixel value in input data', async () => {
         /** given */
         const filePath = path.resolve(__dirname, 'files/fail-no-white-pixel.txt');
         const reader = new InputFileReader();
 
         /** when */
-        reader.readInputFile(filePath);
+        await reader.readInputFile(filePath);
 
         /** then */
-        reader.interface.on('close', () => {
-            expect(reader.getBitmap()).toThrow(WhitePixelNotFoundException);
-            expect(reader.getBitmap()).toThrow('No white pixel found in bitmap');
-        });
+        try {
+            reader.getBitmap();
+        } catch (e) {
+            /** then */
+            expect(e).toBeInstanceOf(WhitePixelNotFoundException);
+            expect(e.message).toBe('No white pixel found in bitmap');
+        }
     });
 
     it('should throw validation exception if input data is not valid', () => {
