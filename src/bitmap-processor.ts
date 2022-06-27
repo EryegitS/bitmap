@@ -33,7 +33,7 @@ export class BitmapProcessor {
      * @private
      */
     private computeCosts(): Bitmap<number> {
-        const queue: Pixel[] = this._reader.whitePixels.map(white => {
+        const queue: Pixel[] = this.reader.whitePixels.map(white => {
             white.isHit = true;
             return white;
         });
