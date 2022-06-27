@@ -58,7 +58,7 @@ export class BitmapProcessor {
     }
 
     /**
-     * checks whether new pixel position all into bitmap
+     * checks whether new pixel position fall into bitmap
      * @param rowIndex: row index of candidate pixel
      * @param columnIndex: column index of candidate pixel
      * @private
@@ -68,7 +68,7 @@ export class BitmapProcessor {
     }
 
     /**
-     * get neighbour pixels of the pixel sent as parameter
+     * get neighbour pixels of the pixel
      * checking whether is hit already while detecting neighbours
      * @param pixel
      * @private
